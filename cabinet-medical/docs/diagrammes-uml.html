@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Diagrammes UML — Cabinet Médical</title>
+<style>
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f4f7fa; color: #1a202c; margin: 0; padding: 2rem; }
+  h1 { color: #1a6b9a; border-bottom: 3px solid #1a6b9a; padding-bottom: .5rem; }
+  h2 { color: #2d3748; margin-top: 2.5rem; }
+  .section { background: #fff; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  pre { background: #1a1f36; color: #e2e8f0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: .82rem; line-height: 1.6; }
+  .note { background: #fffbeb; border-left: 4px solid #f59e0b; padding: .75rem 1rem; border-radius: 0 6px 6px 0; font-size: .875rem; margin-top: 1rem; }
+</style>
+</head>
+<body>
+<h1>📊 Diagrammes UML — Système de Gestion de Cabinet Médical</h1>
+<p style="color:#718096">Faculté des Sciences Semlalia, Université Cadi Ayyad · Module PHP Backend S6</p>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="section">
+<h2>1. Diagramme de Cas d'Utilisation</h2>
+<pre>
+@startuml
+left to right direction
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor #FEFEFE
+
+' ── Acteurs ──────────────────────────────────────────────
+actor "Administrateur"  as Admin  #DarkRed
+actor "Médecin"         as Doctor #Green
+actor "Secrétaire"      as Sec    #Orange
+actor "Patient"         as Pat    #SteelBlue
+
+Admin    --|> Sec   : hérite de
+Doctor   --|> Pat   : hérite de (lecture dossier)
+
+' ── Système ──────────────────────────────────────────────
+rectangle "Système de Gestion de Cabinet Médical" {
+
+  package "Authentification" {
+    (S'inscrire)            as UC1
+    (Se connecter)          as UC2
+    (Se déconnecter)        as UC3
+    (Gérer les rôles)       as UC4
+  }
+
+  package "Gestion des Patients" {
+    (Créer fiche patient)   as UC5
+    (Modifier fiche patient) as UC6
+    (Rechercher un patient) as UC7
+    (Consulter dossier médical) as UC8
+  }
+
+  package "Rendez-vous" {
+    (Prendre rendez-vous)   as UC9
+    (Confirmer rendez-vous) as UC10
+    (Annuler rendez-vous)   as UC11
+    (Voir calendrier)       as UC12
+    (Envoyer rappel email)  as UC13
+  }
+
+  package "Consultation" {
+    (Saisir compte-rendu)   as UC14
+    (Rédiger ordonnance)    as UC15
+    (Exporter ordonnance PDF) as UC16
+    (Consulter historique)  as UC17
+  }
+
+  package "Administration" {
+    (Gérer utilisateurs)    as UC18
+    (Configurer disponibilités) as UC19
+    (Tableau de bord stats) as UC20
+  }
+}
+
+' ── Relations Acteurs → Cas d'utilisation ────────────────
+Pat    --> UC1
+Pat    --> UC2
+Pat    --> UC3
+Pat    --> UC9
+Pat    --> UC11
+Pat    --> UC12
+Pat    --> UC17
+
+Sec    --> UC5
+Sec    --> UC6
+Sec    --> UC7
+Sec    --> UC9
+Sec    --> UC10
+Sec    --> UC11
+Sec    --> UC12
+
+Doctor --> UC7
+Doctor --> UC8
+Doctor --> UC12
+Doctor --> UC14
+Doctor --> UC15
+Doctor --> UC16
+Doctor --> UC17
+
+Admin  --> UC4
+Admin  --> UC18
+Admin  --> UC19
+Admin  --> UC20
+
+' ── Include / Extend ────────────────────────────────────
+UC9  ..> UC13 : <<include>>
+UC10 ..> UC13 : <<include>>
+UC15 ..> UC16 : <<extend>>
+UC2  ..> UC4  : <<include>>
+@enduml
+</pre>
+<div class="note">💡 Coller ce code dans <a href="https://plantuml.com/plantuml" target="_blank">plantuml.com</a> ou <a href="https://app.diagrams.net" target="_blank">draw.io</a> pour générer le diagramme.</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="section">
+<h2>2. Diagramme de Classes</h2>
+<pre>
+@startuml
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #FEFEFE
+skinparam class {
+  BackgroundColor #EFF6FF
+  BorderColor #1a6b9a
+  ArrowColor #1a6b9a
+}
+
+class User {
+  +id: int
+  +name: string
+  +email: string
+  +password: string
+  +role: enum[admin,doctor,secretary,patient]
+  +phone: string
+  +avatar: string
+  +is_active: boolean
+  +created_at: datetime
+  --
+  +isAdmin(): bool
+  +isDoctor(): bool
+  +isSecretary(): bool
+  +isPatient(): bool
+  +getRoleLabelAttribute(): string
+}
+
+class Doctor {
+  +id: int
+  +user_id: int
+  +specialty: string
+  +license_number: string
+  +description: text
+  +consultation_price: decimal
+  +consultation_duration: int
+  --
+  +getFullTitleAttribute(): string
+  +isAvailableOn(day): bool
+  +getTodayAppointmentsCountAttribute(): int
+  +getMonthlyRevenueAttribute(): float
+}
+
+class Patient {
+  +id: int
+  +user_id: int
+  +birth_date: date
+  +gender: enum[male,female]
+  +blood_type: string
+  +address: text
+  +cin: string
+  +allergies: text
+  +chronic_diseases: text
+  +medical_history: text
+  +emergency_contact_name: string
+  +emergency_contact_phone: string
+  --
+  +getAgeAttribute(): int
+  +getLastConsultationAttribute(): Consultation
+  +getUpcomingAppointmentAttribute(): Appointment
+}
+
+class Secretary {
+  +id: int
+  +user_id: int
+  +department: string
+}
+
+class Appointment {
+  +id: int
+  +patient_id: int
+  +doctor_id: int
+  +created_by: int
+  +scheduled_at: datetime
+  +duration: int
+  +status: enum[pending,confirmed,cancelled,completed,no_show]
+  +reason: string
+  +notes: text
+  +cancellation_reason: string
+  +reminder_sent: boolean
+  --
+  +getStatusLabelAttribute(): string
+  +getStatusColorAttribute(): string
+  +getEndTimeAttribute(): Carbon
+  +canBeCancelled(): bool
+  +canBeConfirmed(): bool
+}
+
+class DoctorAvailability {
+  +id: int
+  +doctor_id: int
+  +day_of_week: enum
+  +start_time: time
+  +end_time: time
+  +is_available: boolean
+  --
+  +getDayLabelAttribute(): string
+}
+
+class Consultation {
+  +id: int
+  +appointment_id: int
+  +doctor_id: int
+  +patient_id: int
+  +chief_complaint: text
+  +diagnosis: text
+  +notes: text
+  +weight: decimal
+  +height: decimal
+  +blood_pressure_systolic: int
+  +blood_pressure_diastolic: int
+  +temperature: decimal
+  +heart_rate: int
+  +price: decimal
+  +payment_status: enum
+  --
+  +getBloodPressureAttribute(): string
+  +getBmiAttribute(): float
+}
+
+class Prescription {
+  +id: int
+  +consultation_id: int
+  +doctor_id: int
+  +patient_id: int
+  +notes: text
+}
+
+class PrescriptionItem {
+  +id: int
+  +prescription_id: int
+  +medication: string
+  +dosage: string
+  +frequency: string
+  +duration: string
+  +instructions: text
+}
+
+' ── Relations ───────────────────────────────────────────
+User       "1" -- "0..1" Doctor       : a un profil >
+User       "1" -- "0..1" Patient      : a un profil >
+User       "1" -- "0..1" Secretary    : a un profil >
+Doctor     "1" -- "0..*" DoctorAvailability : définit ses disponibilités >
+Doctor     "1" -- "0..*" Appointment  : reçoit >
+Patient    "1" -- "0..*" Appointment  : prend >
+Appointment "1" -- "0..1" Consultation : donne lieu à >
+Doctor     "1" -- "0..*" Consultation : réalise >
+Patient    "1" -- "0..*" Consultation : reçoit >
+Consultation "1" -- "0..1" Prescription : génère >
+Prescription "1" *-- "1..*" PrescriptionItem : contient >
+@enduml
+</pre>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="section">
+<h2>3. Diagrammes de Séquence</h2>
+
+<h3 style="color:#4a5568;margin-top:1.5rem">3.1 — Prise de rendez-vous par un patient</h3>
+<pre>
+@startuml
+skinparam backgroundColor #FEFEFE
+actor Patient
+participant ":AppointmentController" as AC
+participant ":Appointment" as A
+participant ":DoctorAvailability" as DA
+participant ":AppointmentConfirmed\n(Notification)" as N
+database "Base de données" as DB
+
+Patient -> AC : GET /appointments/create
+activate AC
+AC -> DB : SELECT doctors, patients
+DB --> AC : liste des médecins
+AC --> Patient : afficher formulaire
+deactivate AC
+
+Patient -> AC : POST /appointments\n(doctor_id, date, reason)
+activate AC
+AC -> A : vérifier créneau disponible
+activate A
+A -> DB : SELECT conflicting appointments
+DB --> A : aucun conflit
+A --> AC : créneau libre
+deactivate A
+
+AC -> DA : vérifier disponibilité médecin
+activate DA
+DA -> DB : SELECT availability (day, time)
+DB --> DA : disponibilité trouvée
+DA --> AC : médecin disponible
+deactivate DA
+
+AC -> DB : INSERT INTO appointments
+DB --> AC : appointment.id = 42
+
+AC -> N : notify(patient, AppointmentConfirmed)
+activate N
+N --> Patient : Email de confirmation
+deactivate N
+
+AC --> Patient : redirect /appointments/42\n(message: "RDV créé avec succès")
+deactivate AC
+@enduml
+</pre>
+
+<h3 style="color:#4a5568;margin-top:1.5rem">3.2 — Déroulement d'une consultation médicale</h3>
+<pre>
+@startuml
+skinparam backgroundColor #FEFEFE
+actor Médecin
+participant ":ConsultationController" as CC
+participant ":Consultation" as C
+participant ":Prescription" as P
+participant ":Appointment" as A
+database "Base de données" as DB
+participant "DomPDF" as PDF
+
+Médecin -> CC : GET /consultations/appointment/{id}/create
+activate CC
+CC -> DB : SELECT appointment + patient
+DB --> CC : données appointment
+CC --> Médecin : formulaire consultation
+deactivate CC
+
+Médecin -> CC : POST /consultations/appointment/{id}\n(diagnostic, signes vitaux, médicaments)
+activate CC
+
+CC -> C : Consultation::create(...)
+activate C
+C -> DB : INSERT INTO consultations
+DB --> C : consultation.id = 15
+deactivate C
+
+CC -> P : Prescription::create(...)
+activate P
+P -> DB : INSERT INTO prescriptions
+P -> DB : INSERT INTO prescription_items (x3)
+DB --> P : OK
+deactivate P
+
+CC -> A : update(status = 'completed')
+A -> DB : UPDATE appointments SET status='completed'
+DB --> A : OK
+
+CC --> Médecin : redirect /consultations/15
+deactivate CC
+
+Médecin -> CC : GET /prescriptions/5/pdf
+activate CC
+CC -> DB : SELECT prescription + items + patient + doctor
+DB --> CC : données complètes
+CC -> PDF : Pdf::loadView('pdf.prescription', data)
+activate PDF
+PDF --> CC : PDF généré (binary)
+deactivate PDF
+CC --> Médecin : Télécharger ordonnance.pdf
+deactivate CC
+@enduml
+</pre>
+
+<h3 style="color:#4a5568;margin-top:1.5rem">3.3 — Authentification d'un utilisateur</h3>
+<pre>
+@startuml
+skinparam backgroundColor #FEFEFE
+actor Utilisateur
+participant ":AuthController" as Auth
+participant "Auth (Laravel)" as LA
+participant ":User" as U
+participant ":RoleMiddleware" as RM
+database "Base de données" as DB
+
+Utilisateur -> Auth : GET /login
+Auth --> Utilisateur : formulaire de connexion
+
+Utilisateur -> Auth : POST /login\n(email, password)
+activate Auth
+
+Auth -> U : User::where('email', ...)->first()
+activate U
+U -> DB : SELECT * FROM users WHERE email=?
+DB --> U : user record
+U --> Auth : user object
+deactivate U
+
+alt compte désactivé
+  Auth --> Utilisateur : "Votre compte est désactivé"
+else
+  Auth -> LA : Auth::attempt(credentials)
+  activate LA
+  LA -> DB : vérifier password (bcrypt)
+  DB --> LA : password valide
+  LA --> Auth : true (authentifié)
+  deactivate LA
+
+  Auth -> Auth : session()->regenerate()
+
+  Auth -> RM : redirectBasedOnRole()
+  activate RM
+  RM --> Auth : route selon rôle
+  deactivate RM
+
+  Auth --> Utilisateur : redirect vers dashboard\n(admin|doctor|secretary|patient)
+end
+deactivate Auth
+
+note over RM
+  Chaque requête suivante passe par RoleMiddleware
+  qui vérifie le rôle et is_active
+end note
+@enduml
+</pre>
+</div>
+
+</body>
+</html>
