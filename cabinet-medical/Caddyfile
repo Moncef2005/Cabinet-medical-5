@@ -3,7 +3,8 @@
     admin off
 }
 
-:{$PORT} {
+:8000 {
     root * /app/public
+    encode gzip
     php_server
 }
