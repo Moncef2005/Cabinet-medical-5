@@ -5,12 +5,7 @@ nixPkgs = ["php82", "php82Extensions.pdo", "php82Extensions.pdo_mysql", "php82Ex
 cmds = ["composer install --no-dev --optimize-autoloader --no-interaction"]
 
 [phases.build]
-cmds = [
-    "php artisan config:clear",
-    "php artisan view:clear", 
-    "php artisan route:clear",
-    "php artisan migrate --seed --force"
-]
+cmds = ["php artisan config:clear", "php artisan view:clear", "php artisan route:clear"]
 
 [start]
-cmd = "frankenphp run --config Caddyfile"
+cmd = "bash start.sh"
