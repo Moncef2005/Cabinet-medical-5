@@ -84,7 +84,12 @@ class AppointmentController extends Controller
         ]);
 
         // Send notification email
-        $appointment->patient->user->notify(new AppointmentConfirmed($appointment));
+        // Après (corrigé)
+try {
+    $appointment->patient->user->notify(new AppointmentConfirmed($appointment));
+} catch (\Exception $e) {
+    \Log::error('Email non envoyé: ' . $e->getMessage());
+}
 
         return redirect()->route('appointments.show', $appointment)
                          ->with('success', 'Rendez-vous créé avec succès. Un email de confirmation a été envoyé.');
@@ -150,7 +155,14 @@ class AppointmentController extends Controller
             'cancellation_reason'  => $request->cancellation_reason,
         ]);
 
-        $appointment->patient->user->notify(new AppointmentCancelled($appointment));
+ 
+
+// Après
+try {
+    $appointment->patient->user->notify(new AppointmentConfirmed($appointment));
+} catch (\Exception $e) {
+    \Log::error('Email non envoyé: ' . $e->getMessage());
+}
 
         return redirect()->route('appointments.index')->with('success', 'Rendez-vous annulé.');
     }
