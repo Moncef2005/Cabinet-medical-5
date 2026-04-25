@@ -222,8 +222,12 @@ QUEUE_CONNECTION=database
 
 ## 👥 Équipe
 
-- **Mme JABIR Somaya** — Enseignante
-- **Mme BABA Naima** — Enseignante
+- **Moncef Aaouine** 
+- **Anas Bouzbouz**
+- **Jamal Benidar**
+- **Salah edin shelkha**
+
+
 
 Développé dans le cadre du module **Programmation Backend PHP** — Semestre S6 — Année 2025/2026
 
