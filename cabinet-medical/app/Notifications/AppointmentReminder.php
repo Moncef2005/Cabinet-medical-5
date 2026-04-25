@@ -6,7 +6,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class AppointmentReminder extends Notification implements ShouldQueue {
+class AppointmentReminder extends Notification  {
     use Queueable;
     public function __construct(public Appointment $appointment) {}
     public function via($notifiable): array { return ['mail', 'database']; }
