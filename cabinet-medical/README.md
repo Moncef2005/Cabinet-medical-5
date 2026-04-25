@@ -64,9 +64,7 @@ DB_DATABASE=cabinet_medical
 DB_USERNAME=root
 DB_PASSWORD=votre_mot_de_passe
 
-MAIL_HOST=sandbox.smtp.mailtrap.io
-MAIL_USERNAME=votre_username_mailtrap
-MAIL_PASSWORD=votre_password_mailtrap
+
 ```
 
 ### 4. Créer la base de données
